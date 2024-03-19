@@ -1,13 +1,30 @@
 #!/usr/bin/env bash
-# install nginx web server
+# Update the package list
 
-sudo apt-get update && upgrade
+sudo apt-get update
+
+# Install nginx
 sudo apt-get install nginx -y
 
-#Create a directory called html inside your nginx server
-sudo mkdir -p /var/www/html
-#Create a file inside that directory called index.html
-sudo touch /var/www/html/index.html
-#Display your message then
-sudo echo "Holberton School" > /var/www/html/index.html
+# Configure nginx to listen on port 80
+sudo sed -i 's/listen 80 default_server/listen 80/g' /etc/nginx/sites-available/default
+
+# Restart nginx
 sudo service nginx restart
+
+# Create a sample HTML file containing the string "Holberton School"
+echo "<html><body>Holberton School</body></html>" | sudo tee /var/www/html/index.html >/dev/null
+
+# Test the nginx configuration
+curl -sI 127.0.0.1 | grep "HTTP/1.1 200 OK" >/dev/null
+
+if [ $? -eq 0 ]; then
+  curl 127.0.0.1 | grep "Holberton School" >/dev/null
+  if [ $? -eq 0 ]; then
+    echo "Configuration successful!"
+    exit 0
+  fi
+fi
+
+echo "Something went wrong :("
+exit 1
